@@ -1,5 +1,2 @@
-var myTestFunction = function(input) {
-    return input + 1;
-};
-
-myTestFunction(10);
+var compiledTemplate = Handlebars.compile(typeof(overrideTemplate) !== 'undefined' ? overrideTemplate : defaultTemplate);
+compiledTemplate({'name': 'abracadabra'});
