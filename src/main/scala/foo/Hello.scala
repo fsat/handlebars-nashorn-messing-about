@@ -1,6 +1,6 @@
 package foo
 
-import java.io.{FileReader, File}
+import java.io.{InputStreamReader, FileReader, File}
 import javax.script._
 import scala.collection.JavaConverters._
 
@@ -27,5 +27,5 @@ object Hello {
   private def compile(engine: ScriptEngine, path: String): CompiledScript =
     engine
       .asInstanceOf[Compilable]
-      .compile(new FileReader(new File(this.getClass.getResource(path).getFile)))
+      .compile(new InputStreamReader(this.getClass.getResourceAsStream(path)))
 }
