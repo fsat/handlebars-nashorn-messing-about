@@ -1,32 +1,31 @@
 package foo
 
 import java.io.{FileReader, File}
-import javax.script.{SimpleBindings, Bindings, ScriptEngine, ScriptEngineManager}
+import javax.script._
 import scala.collection.JavaConverters._
 
 object Hello {
+  val engineManager = new ScriptEngineManager(this.getClass.getClassLoader)
+  val engine = engineManager.getEngineByName("nashorn")
+  val compiledHandlebars = compile(engine, "/handlebars-4.0.5.js")
+  val compiledScript = compile(engine, "/script.js")
+
   def main(args: Array[String]): Unit = {
-    val engineManager = new ScriptEngineManager(this.getClass.getClassLoader)
-    val engine = engineManager.getEngineByName("nashorn")
-    println(s"Got engine [$engine]")
+    val bindings = engine.createBindings()
+    compiledHandlebars.eval(bindings)
 
-    loadJs(engine, "/handlebars-4.0.5.js")
-    val handlebars = engine.eval("Handlebars")
-    println(s"Handlebars compiled - $handlebars")
+    bindings.put("defaultTemplate", "hello {{ name }}")
+    bindings.put("overrideTemplate", "this is override {{ name }}")
+    bindings.put("context", Map("data" -> """ { "name": "city wok" } """).asJava)
 
-    engine.put("defaultTemplate", "hello {{ name }}")
-    engine.put("overrideTemplate", "this is override {{ name }}")
-    engine.put("context", Map("data" -> """ { "name": "city wok" } """).asJava)
-
-    val returnValue = loadJs(engine, "/script.js")
+    val returnValue = compiledScript.eval(bindings)
     println("----")
     println(returnValue)
     println("----")
   }
 
-  private def loadJs(engine: ScriptEngine, file: String, bindings: Option[Bindings] = None): AnyRef = {
-    val scriptJs = new File(this.getClass.getResource(file).getFile)
-    val fileReader = new FileReader(scriptJs)
-    bindings.fold(engine.eval(fileReader))(engine.eval(fileReader, _))
-  }
+  private def compile(engine: ScriptEngine, path: String): CompiledScript =
+    engine
+      .asInstanceOf[Compilable]
+      .compile(new FileReader(new File(this.getClass.getResource(path).getFile)))
 }
