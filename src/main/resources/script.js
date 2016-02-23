@@ -1,2 +1,3 @@
 var compiledTemplate = Handlebars.compile(typeof(overrideTemplate) !== 'undefined' ? overrideTemplate : defaultTemplate);
-compiledTemplate({'name': 'abracadabra'});
+var contextData = JSON.parse(context.data);
+compiledTemplate(contextData);
